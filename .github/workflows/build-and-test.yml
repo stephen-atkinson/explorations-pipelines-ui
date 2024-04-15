@@ -13,10 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Setup Node.js ${{ end.NODE_VERSION }}
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ end.NODE_VERSION }}
+          node-version: ${{ env.NODE_VERSION }}
   
       - name: NPM Clean Install
         run: npm ci
