@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20.x'
+  APP_ARTIFACT_NAME: 'app'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+  
+      - name: NPM Clean Install
+        run: npm ci
+  
+      - name: Build
+        run: npm run build
+
+      - name: Upload Publish Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APP_ARTIFACT_NAME }}
+          path: /dist
+
+  staging:
+    needs: publish
+    environment: Staging
+    runs-on: ubuntu-latest
+
+    steps:
+    
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Publish Artifact
+        uses: actions/download-artifact@v4
+        with:
+         name: ${{ env.APP_ARTIFACT_NAME }}
+         path: artifacts/${{ env.APP_ARTIFACT_NAME }}
+
+      - run: |
+          cd artifacts/${{ env.APP_ARTIFACT_NAME }}
+          dir
+      
+  production:
+      needs: staging
+      environment: Production
+      runs-on: ubuntu-latest
+
+      steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - run: dir
